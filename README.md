@@ -76,6 +76,14 @@ sudo camerabridge-agent enroll --relay camerabridge-relay.vivekmalipatel.com \
 `--location` is a short lowercase label for this place (letters, digits and hyphens), one per site.
 `--site-name` is how the site is shown.
 
+`--bandwidth-kbps` caps how much upload the agent uses. It defaults to 2600 kbps per camera, which
+fits a 1080p main stream. If your internet upload is smaller than that total, measure it (a browser
+speed test on the same network is enough) and set
+`--bandwidth-kbps` to the lower of `0.7 x your upload in kbps` and `2600 x number of cameras`. For
+example, 6 cameras on a 20 Mbps upload: `--bandwidth-kbps 14000`. A cap below the cameras' real
+bitrate drops video, so if the picture breaks up, raise the cap or switch the cameras to a lower
+bitrate.
+
 Then:
 
 1. The agent asks for each camera's password. Nothing is shown as you type.
