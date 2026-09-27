@@ -134,8 +134,11 @@ A healthy agent logs `login to server success` and, for each camera, `camera=<na
 camera shows `auth-failed`, its password is wrong: the agent then waits 5 minutes between tries so
 the camera does not lock the account.
 
-If the site is revoked, or its settings are wrong, the service stops and stays stopped (exit 2)
-instead of retrying. Other failures restart it after 10 seconds, at most five times in ten minutes.
+If the site is revoked, or its settings are wrong, the service stops and stays stopped (exit 78)
+instead of retrying. Temporary problems never stop it: if the identity provider, DNS, the network or
+the relay is down, or this machine's clock is wrong, the agent keeps running and retries on its own,
+logging each attempt as `failed (attempt N), retrying in ...`, and the site comes back by itself once
+the problem clears. A crash restarts the service after 10 seconds, at most five times in ten minutes.
 
 ---
 
@@ -151,6 +154,10 @@ instead of retrying. Other failures restart it after 10 seconds, at most five ti
 | `the approval is too old` or the code expired | Run enroll again and approve within 5 minutes. |
 | `429` / `wait a minute` | Too many attempts from your network. Wait a minute, then run enroll again. |
 | `the approval is dated in the future; check this box's clock` | Turn on automatic time on this machine. |
+| `CLOCK SKEW: this box's clock is ... the issuer's` | Turn on automatic time (`timedatectl set-ntp true` on Linux). The agent recovers by itself once the clock is right. |
+| `retrying in ...` with `503`, `no such host` or `connection refused` | The identity provider, DNS or the network is down. Nothing to do on this machine; the agent recovers by itself. |
+| `500 server_error: Errors.Internal` that never clears | Either a long identity provider outage, or this site's key was deleted. Ask your CameraBridge administrator to check the site. |
+| The service is stopped with exit code 78 | The site was revoked (`Errors.User.NotActive`) or its settings are wrong; the log line before the exit says which. |
 | `location ... already has a site` | That location is enrolled. To replace its machine, use `--rebind <site-id>`. |
 | Windows SmartScreen warns about the exe | It is not Authenticode-signed yet; the installer verified the signature and checksum before clearing the warning. |
 
